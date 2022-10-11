@@ -1,0 +1,174 @@
+---
+title: "case_study"
+author: "Zining Qi"
+date: "2022-10-11"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(p8105.datasets)
+data(nyc_airbnb)
+```
+
+Brainstorm questions
+
+* what are variables that are relevant to higher review/scores
+* what are the popular places to rent
+* what portion of hosts / locations are private rooms vs entire room
+* what makes an airbnb more expensive
+
+```{r}
+airbnb = nyc_airbnb %>% 
+  rename(borough = neighbourhood_group) %>% 
+  mutate(
+    stars = review_scores_location/2)
+```
+
+
+```{r}
+airbnb %>% 
+  group_by(borough, room_type) %>% 
+  summarize(
+    mean_price = mean(price, na.rm = TRUE)
+  ) %>% 
+  pivot_wider(
+    names_from = room_type,
+    values_from = mean_price
+  )
+```
+
+```{r}
+airbnb %>% 
+  filter(
+    borough == "Manhattan",
+    room_type == "Entire home/apt",
+    price = 1000
+  ) %>% 
+  ggplot(aes(x = price)) + geom_histogram() +
+  facet_grid(.~ room_type)
+```
+
+```{r}
+airbnb %>% 
+  filter(borough == "Manhattan") %>% 
+  ggplot(aes(x = stars, y = price)) +
+  facet_grid(.~ room_type)
+```
+
+```{r}
+airbnb %>% 
+  filter(borough == "Manhattan") %>%
+  group_by(neighbourhood) %>% 
+  summarize(mean_price = mean(price, na.rm = TRUE)) %>% 
+  arrange(desc(mean_price))
+```
+
+```{r}
+airbnb %>% 
+  filter(borough == "Manhattan",
+         room_type == "Entire home/apt") %>%
+  filter(price <= 1000) %>% 
+  mutate(neighbourhood = fct_reorder(neighbourhood, price)) %>% 
+  ggplot(aes(x = neighbourhood, y = price)) +
+  geom_boxplot() +
+  coord_flip()
+```
+
+Price vs Location
+```{r}
+airbnb %>% 
+  filter(borough == "Manhattan",
+         room_type == "Entire home/apt") %>%
+  filter(price <= 1000) %>% 
+  ggplot(aes(x = lat, y = long, color = price)) +
+  geom_point(alpha = .5)
+```
+
+```{r}
+library(leaflet)
+airbnb %>% 
+  filter(borough == "Manhattan",
+         room_type == "Entire home/apt") %>%
+  filter(price <= 1000) %>% 
+  sample_n(1000) %>% 
+  leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircleMarkers(~lat, ~long, radius = 0.5, color = ~pal(price))
+```
+
+
+```{r}
+most_popular = nyc_airbnb %>%
+  group_by(neighbourhood, neighbourhood_group) %>%
+  distinct() %>%
+  summarize(n_obs = n()) %>%
+  ungroup() %>% 
+  mutate(rank = min_rank(desc(n_obs))) %>% 
+  filter(rank > 5) %>% 
+  arrange(neighbourhood_group, n_obs)
+
+most_popular
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
